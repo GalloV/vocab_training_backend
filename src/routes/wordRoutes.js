@@ -5,7 +5,7 @@ import protectRoute from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 // Create a new word (admin only route typically)
-router.post("/", protectRoute, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const {
       word,
