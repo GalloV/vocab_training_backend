@@ -133,7 +133,7 @@ router.post("/", async (req, res) => {
 });
 
 // Get all words with pagination and filtering
-router.get("/", async (req, res) => {
+router.get("/", protectRoute, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -165,7 +165,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get a single word by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", protectRoute, async (req, res) => {
   try {
     const word = await Word.findById(req.params.id);
     if (!word) {
@@ -179,14 +179,61 @@ router.get("/:id", async (req, res) => {
 });
 
 // Get words by level
-router.get("/level/:level", async (req, res) => {
+router.get("/level/:level", protectRoute, async (req, res) => {
   try {
     const { level } = req.params;
+    const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    
+    if (!validLevels.includes(level)) {
+      return res.status(400).json({ 
+        message: "Invalid level. Must be one of: A1, A2, B1, B2, C1, C2" 
+      });
+    }
+
     const words = await Word.find({ level })
       .sort({ frequency: -1, word: 1 });
+
+    if (!words || words.length === 0) {
+      return res.status(404).json({ 
+        message: `No words found for level ${level}` 
+      });
+    }
+
     res.json(words);
   } catch (error) {
     console.log("Error getting words by level", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Get a random word for a specific level
+router.get("/random/:level", protectRoute, async (req, res) => {
+  try {
+    const { level } = req.params;
+    const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    
+    if (!validLevels.includes(level)) {
+      return res.status(400).json({ 
+        message: "Invalid level. Must be one of: A1, A2, B1, B2, C1, C2" 
+      });
+    }
+
+    // Get count of words for the level
+    const count = await Word.countDocuments({ level });
+    
+    if (count === 0) {
+      return res.status(404).json({ 
+        message: `No words found for level ${level}` 
+      });
+    }
+
+    // Get a random word
+    const random = Math.floor(Math.random() * count);
+    const word = await Word.findOne({ level }).skip(random);
+
+    res.json(word);
+  } catch (error) {
+    console.log("Error getting random word", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
