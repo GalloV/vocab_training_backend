@@ -4,6 +4,79 @@ import protectRoute from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+// Create multiple words at once
+router.post("/bulk", protectRoute, async (req, res) => {
+  try {
+    const { words } = req.body;
+
+    if (!Array.isArray(words) || words.length === 0) {
+      return res.status(400).json({ message: "Please provide an array of words" });
+    }
+
+    const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const validationErrors = [];
+
+    // Validate each word before attempting to save
+    words.forEach((word, index) => {
+      const {
+        word: wordText,
+        definition,
+        examples,
+        partOfSpeech,
+        phonetic,
+        origin,
+        level,
+        frequency,
+        source
+      } = word;
+
+      if (!wordText || !definition || !examples || !partOfSpeech || !phonetic || !origin || !level || !frequency || !source) {
+        validationErrors.push(`Word at index ${index}: Missing required fields`);
+      }
+
+      if (!validLevels.includes(level)) {
+        validationErrors.push(`Word at index ${index}: Invalid level. Must be one of: A1, A2, B1, B2, C1, C2`);
+      }
+
+      if (frequency < 1 || frequency > 5) {
+        validationErrors.push(`Word at index ${index}: Frequency must be between 1 and 5`);
+      }
+
+      if (!Array.isArray(examples) || examples.length === 0) {
+        validationErrors.push(`Word at index ${index}: Examples must be a non-empty array`);
+      }
+    });
+
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ 
+        message: "Validation errors",
+        errors: validationErrors 
+      });
+    }
+
+    // Prepare words for insertion
+    const wordsToInsert = words.map(word => ({
+      ...word,
+      synonyms: word.synonyms || [],
+      antonyms: word.antonyms || []
+    }));
+
+    // Insert all words
+    const savedWords = await Word.insertMany(wordsToInsert);
+
+    res.status(201).json({
+      message: `Successfully created ${savedWords.length} words`,
+      words: savedWords
+    });
+  } catch (error) {
+    console.log("Error creating multiple words", error);
+    res.status(500).json({ 
+      message: "Error creating words",
+      error: error.message 
+    });
+  }
+});
+
 // Create a new word (admin only route typically)
 router.post("/", async (req, res) => {
   try {
