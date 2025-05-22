@@ -5,7 +5,7 @@ import protectRoute from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 // Create multiple words at once
-router.post("/bulk", protectRoute, async (req, res) => {
+router.post("/bulk", async (req, res) => {
   try {
     const { words } = req.body;
 
