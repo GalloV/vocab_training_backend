@@ -133,7 +133,7 @@ router.post("/", async (req, res) => {
 });
 
 // Get all words with pagination and filtering
-router.get("/", protectRoute, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -165,7 +165,7 @@ router.get("/", protectRoute, async (req, res) => {
 });
 
 // Get a single word by ID
-router.get("/:id", protectRoute, async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const word = await Word.findById(req.params.id);
     if (!word) {
@@ -179,7 +179,7 @@ router.get("/:id", protectRoute, async (req, res) => {
 });
 
 // Get words by level
-router.get("/level/:level", protectRoute, async (req, res) => {
+router.get("/level/:level", async (req, res) => {
   try {
     const { level } = req.params;
     const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
@@ -207,7 +207,7 @@ router.get("/level/:level", protectRoute, async (req, res) => {
 });
 
 // Get a random word for a specific level
-router.get("/random/:level", protectRoute, async (req, res) => {
+router.get("/random/:level", async (req, res) => {
   try {
     const { level } = req.params;
     const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
@@ -239,7 +239,7 @@ router.get("/random/:level", protectRoute, async (req, res) => {
 });
 
 // Update a word (admin only route typically)
-router.put("/:id", protectRoute, async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const word = await Word.findById(req.params.id);
     if (!word) {
