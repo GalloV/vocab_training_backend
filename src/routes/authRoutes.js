@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import protectRoute from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -93,6 +94,47 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.log("Error in login route", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Update user's level
+router.put("/update-level", protectRoute, async (req, res) => {
+  try {
+    const { level } = req.body;
+    const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+
+    if (!level) {
+      return res.status(400).json({ message: "Level is required" });
+    }
+
+    if (!validLevels.includes(level)) {
+      return res.status(400).json({ 
+        message: "Invalid level. Must be one of: A1, A2, B1, B2, C1, C2" 
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.level = level;
+    await user.save();
+
+    res.json({
+      message: "Level updated successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        level: user.level,
+        profileImage: user.profileImage,
+        createdAt: user.createdAt,
+      }
+    });
+  } catch (error) {
+    console.log("Error updating user level:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

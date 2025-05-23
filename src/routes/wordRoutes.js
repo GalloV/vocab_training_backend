@@ -102,7 +102,7 @@ router.post("/", async (req, res) => {
     // Validate level
     const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     if (!validLevels.includes(level)) {
-      return res.status(400).json({ message: "Invalid level. Must be one of: A1, A2, B1, B2, C1, C2" });
+      return res.status(400).json({ message: "Invalid level. Must be one of: A0, A1, A2, B1, B2, C1, C2" });
     }
 
     // Validate frequency
