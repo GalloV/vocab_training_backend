@@ -24,8 +24,8 @@ const userSchema = new mongoose.Schema(
     },
     level: {
       type: String,
-      enum: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
-      default: 'A1'
+      enum: ['A0','A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
+      default: 'A0'
     },
     score: {
       type: Number,

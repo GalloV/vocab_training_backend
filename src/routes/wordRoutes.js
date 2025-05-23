@@ -164,27 +164,16 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get a single word by ID
-router.get("/:id", async (req, res) => {
-  try {
-    const word = await Word.findById(req.params.id);
-    if (!word) {
-      return res.status(404).json({ message: "Word not found" });
-    }
-    res.json(word);
-  } catch (error) {
-    console.log("Error getting word", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
 // Get words by level
 router.get("/level/:level", async (req, res) => {
   try {
     const { level } = req.params;
+    console.log("Fetching words for level:", level);
+    
     const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     
     if (!validLevels.includes(level)) {
+      console.log("Invalid level provided:", level);
       return res.status(400).json({ 
         message: "Invalid level. Must be one of: A1, A2, B1, B2, C1, C2" 
       });
@@ -192,6 +181,8 @@ router.get("/level/:level", async (req, res) => {
 
     const words = await Word.find({ level })
       .sort({ frequency: -1, word: 1 });
+
+    console.log(`Found ${words.length} words for level ${level}`);
 
     if (!words || words.length === 0) {
       return res.status(404).json({ 
@@ -234,6 +225,20 @@ router.get("/random/:level", async (req, res) => {
     res.json(word);
   } catch (error) {
     console.log("Error getting random word", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Get a single word by ID - This should come after other GET routes with parameters
+router.get("/:id", async (req, res) => {
+  try {
+    const word = await Word.findById(req.params.id);
+    if (!word) {
+      return res.status(404).json({ message: "Word not found" });
+    }
+    res.json(word);
+  } catch (error) {
+    console.log("Error getting word", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
